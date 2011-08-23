@@ -15,6 +15,7 @@ class ParcelGen:
     CLASS_STR = "/* package */ abstract class %s implements %s {"
     CHILD_CLASS_STR = "public class {0} extends _{0} {{"
     NATIVE_TYPES = ["string", "byte", "double", "float", "int", "long"]
+    JAVA_NATIVE_TYPES = ["String", "byte", "double", "float", "int", "long", "boolean"]
     JSON_IMPORTS = ["org.json.JSONException", "org.json.JSONObject"]
 
     tablevel = 0
@@ -40,6 +41,18 @@ class ParcelGen:
 
     def downtab(self):
         self.tablevel -= 1
+
+    def write_json_list(self, key, list_typ, member):
+	write_statement = 'object' if list_typ in self.JAVA_NATIVE_TYPES else 'object.writeJson()'
+	array_name = key + 'Array'
+	b = self.tabify("JSONArray %s = new JSONArray();\n" % (array_name))
+	b += self.tabify("for (%s object : %s) {\n" % (list_typ, self.memberize(member)))
+	self.uptab()
+	b += self.tabify("%s.put(%s);\n" % (array_name, write_statement))
+	self.downtab()
+	b += self.tabify("}\n")
+        b += self.tabify("json.put(\"%s\", %s);\n" % (key, array_name))
+	return b
 
     def memberize(self, name):
         return "m%s%s" % (name[0].capitalize(), name[1:])
@@ -365,13 +378,11 @@ class ParcelGen:
         fun = self.tabify("public JSONObject writeJSON() throws JSONException {\n")
         self.uptab()
         fun += self.tabify("JSONObject json = new JSONObject();\n")
-        # Parcelable doesn't support boolean without help, JSON does
-        NATIVES = self.NATIVE_TYPES + ["boolean", "String"]
         for typ in self.get_types():
             list_type = self.list_type(typ)
             # Always protect strings with isNull check because JSONObject.optString()
             # returns the string "null" for null strings.    AWESOME.
-            protect = typ not in [native for native in NATIVES if native != "String"]
+            protect = typ not in [native for native in self.JAVA_NATIVE_TYPES if native != "String"]
             for member in self.props[typ]:
                 # Some object members are derived and not stored in JSON
                 if member in self.json_blacklist:
@@ -384,15 +395,13 @@ class ParcelGen:
                 if protect:
                     fun += self.tabify("if (%s != null) {\n" % self.memberize(member))
                     self.uptab()
-                if typ == "List<String>":
-                    fun += self.tabify("// TODO list writing %s\n" % self.memberize(member))
-                elif typ == "Date":
+                if typ == "Date":
                     fun += self.tabify("json.put(\"%s\", %s.getTime() / 1000);\n" % (key, self.memberize(member)))
                 elif typ == "Uri":
                     fun += self.tabify("json.put(\"%s\", String.valueOf(%s));\n" % (key, self.memberize(member)))
                 elif list_type:
-                    fun += self.tabify("// TODO LIST writing %s \n" % self.memberize(member))
-                elif typ in NATIVES:
+                    fun += self.write_json_list(key, list_type, member)
+                elif typ in self.JAVA_NATIVE_TYPES:
                     fun += self.tabify("json.put(\"%s\", %s);\n" % (key, self.memberize(member)))
                 else:
                     fun += self.tabify("json.put(\"%s\", %s.writeJSON());\n" % (key, self.memberize(member)))
