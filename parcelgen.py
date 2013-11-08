@@ -59,7 +59,7 @@ class ParcelGen:
 
     def gen_setter(self, typ, member):
         method_name = "set%s%s" % (member[0].capitalize(), member[1:])
-        return "\t@JsonProperty(\"%s\")\n\tpublic void %s(%s value) {\n\t\t %s = value;\n\t}" % (member, method_name, typ, self.memberize(member))
+        return "\t@JsonProperty(\"%s\")\n\tpublic void %s(%s value) {\n\t\t %s = value;\n\t}" % (camel_to_under(member), method_name, typ, self.memberize(member))
 
     def list_type(self, typ):
         match = re.match(r"(List|ArrayList)<(.*)>", typ)
