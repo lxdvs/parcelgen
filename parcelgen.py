@@ -198,6 +198,7 @@ class ParcelGen:
                 imports.add("com.yelp.parcelgen.JsonUtil")
         if self.make_serializable:
             imports.add("java.io.Serializable")
+        imports.add("com.fasterxml.jackson.annotation.JsonProperty")
         imports = list(imports)
         imports.sort()
 
