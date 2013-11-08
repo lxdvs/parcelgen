@@ -57,6 +57,10 @@ class ParcelGen:
             method_name = "get%s%s" % (member[0].capitalize(), member[1:])
         return "\tpublic %s %s() {\n\t\t return %s;\n\t}" % (typ, method_name, self.memberize(member))
 
+    def gen_setter(self, typ, member):
+        method_name = "set%s%s" % (member[0].capitalize(), member[1:])
+        return "\t@JsonProperty(\"%s\")\n\tpublic void %s(%s value) {\n\t\t %s = value;\n\t}" % (member, method_name, typ, self.memberize(member))
+
     def list_type(self, typ):
         match = re.match(r"(List|ArrayList)<(.*)>", typ)
         if match:
@@ -243,7 +247,9 @@ class ParcelGen:
         # Getters for member variables
         for typ, member in self.member_map():
             self.output(self.gen_getter(typ, member))
-        self.output("\n")
+            self.printtab("\n")
+            self.output(self.gen_setter(typ, member))
+            self.printtab("\n")
 
         # Parcelable writeToParcel
         self.printtab("public int describeContents() {\n\t\treturn 0;\n\t}")
