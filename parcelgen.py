@@ -49,17 +49,25 @@ class ParcelGen:
             for member in self.props[typ]:
                 yield (typ, member)
 
+    def get_json_for_member(self, member):
+        if member in self.json_map:
+            return self.json_map[member]
+        else:
+            return camel_to_under(member)
+
     def gen_getter(self, typ, member):
         method_name = ""
-        if typ == "boolean" and member.startswith("is"):
+        if typ == "boolean" and (member.startswith("is") or member.startswith("has")):
             method_name = member
+        elif typ == "boolean":
+            method_name = "is%s%s" % (member[0].capitalize(), member[1:])
         else:
             method_name = "get%s%s" % (member[0].capitalize(), member[1:])
         return "\tpublic %s %s() {\n\t\t return %s;\n\t}" % (typ, method_name, self.memberize(member))
 
     def gen_setter(self, typ, member):
         method_name = "set%s%s" % (member[0].capitalize(), member[1:])
-        return "\t@JsonProperty(\"%s\")\n\tpublic void %s(%s value) {\n\t\t %s = value;\n\t}" % (camel_to_under(member), method_name, typ, self.memberize(member))
+        return "\t@JsonProperty(\"%s\")\n\tpublic void %s(%s value) {\n\t\t %s = value;\n\t}" % (self.get_json_for_member(member), method_name, typ, self.memberize(member))
 
     def list_type(self, typ):
         match = re.match(r"(List|ArrayList)<(.*)>", typ)
@@ -318,10 +326,7 @@ class ParcelGen:
                 if member in self.json_blacklist:
                     continue
                 # Some members have different names in JSON
-                if member in self.json_map:
-                    key = self.json_map[member]
-                else:
-                    key = camel_to_under(member)
+                key = self.get_json_for_member(member)
                 # Need to check if key is defined if we have a default value too
                 if member in self.default_values:
                     protect = True
