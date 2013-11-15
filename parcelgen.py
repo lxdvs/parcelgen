@@ -334,7 +334,7 @@ class ParcelGen:
                         self.printtab("}")
                         i += 1
                     elif typ in self.BOX_TYPES:
-                        self.printtab("%s = source.readValue(%s.class.getClassLoader());" % (memberized, typ.capitalize()))
+                        self.printtab("%s = (%s) source.readValue(%s.class.getClassLoader());" % (memberized, typ.capitalize(), typ.capitalize()))
                     elif typ.lower() in self.NATIVE_TYPES:
                         self.printtab("%s = source.read%s();" % (memberized, typ.capitalize()))
                     elif typ in self.serializables:
