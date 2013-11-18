@@ -294,8 +294,9 @@ class ParcelGen:
         for typ, member in self.member_map():
             self.output(self.gen_getter(typ, member))
             self.printtab("\n")
-            self.output(self.gen_setter(typ, member))
-            self.printtab("\n")
+            if member not in self.json_blacklist:
+                self.output(self.gen_setter(typ, member))
+                self.printtab("\n")
 
         # Parcelable writeToParcel
         self.printtab("public int describeContents() {\n\t\treturn 0;\n\t}")
