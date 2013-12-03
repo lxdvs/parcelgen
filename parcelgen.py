@@ -60,7 +60,7 @@ class ParcelGen:
         method_name = ""
         if typ == "boolean" and (member.startswith("is") or member.startswith("has")):
             method_name = member
-        elif typ == "boolean":
+        elif typ == "boolean" or typ == "Boolean":
             method_name = "is%s%s" % (member[0].capitalize(), member[1:])
         else:
             method_name = "get%s%s" % (member[0].capitalize(), member[1:])
