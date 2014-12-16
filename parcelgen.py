@@ -117,7 +117,7 @@ class ParcelGen:
             assignment = self.tabify("%s = source.create%sArray();\n" % (memberized, classname.capitalize())) 			
             return assignment 
         else:
-            assignment = self.tabify("%s = source.createTypedArray(%s.CREATOR);\n" % (memberized, classname.capitalize()))
+            assignment = self.tabify("%s = source.createTypedArray(%s.CREATOR);\n" % (memberized, classname))
             return assignment 
 
     def gen_parcelable_line(self, typ, member):
