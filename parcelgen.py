@@ -13,7 +13,7 @@ import sys, re, os.path, json
 class ParcelGen:
     BASE_IMPORTS = ("android.os.Parcel", "android.os.Parcelable")
     CLASS_STR = "/* package */ abstract class %s implements %s {"
-    CHILD_CLASS_STR = "public class {0} extends _{0} {{"
+    CHILD_CLASS_STR = "public class {0} extends Gen{0} {{"
     NATIVE_TYPES = ["string", "byte", "double", "float", "int", "long"]
     BOX_TYPES = ["Byte", "Boolean", "Float", "Integer", "Long", "Short", "Double"]
     JSON_IMPORTS = ["org.json.JSONException", "org.json.JSONObject"]
@@ -75,7 +75,7 @@ class ParcelGen:
         if match:
             return match.group(2)
         return None
-    
+
     def array_type(self, typ):
         match = re.match(r"(.*)(\[\])", typ)
         if match:
@@ -114,11 +114,11 @@ class ParcelGen:
         if not classname:
             return None
         elif classname.lower() in self.NATIVE_TYPES + ["boolean"]:
-            assignment = self.tabify("%s = source.create%sArray();\n" % (memberized, classname.capitalize())) 			
-            return assignment 
+            assignment = self.tabify("%s = source.create%sArray();\n" % (memberized, classname.capitalize()))
+            return assignment
         else:
             assignment = self.tabify("%s = source.createTypedArray(%s.CREATOR);\n" % (memberized, classname))
-            return assignment 
+            return assignment
 
     def gen_parcelable_line(self, typ, member):
         memberized = self.memberize(member)
@@ -289,7 +289,7 @@ class ParcelGen:
         self.printtab("super();")
         self.downtab()
         self.printtab("}\n")
-    
+
         # Getters for member variables
         for typ, member in self.member_map():
             self.output(self.gen_getter(typ, member))
@@ -378,7 +378,7 @@ class ParcelGen:
                     fun += self.tabify("if (!json.isNull(\"%s\")) {\n" % key)
                     self.uptab()
                 # we need to do some special stuff with arrays, so don't assign
-                # that right away 
+                # that right away
                 if not array_type:
                     fun += self.tabify("%s = " % self.memberize(member))
                 if typ.lower() == "float":
@@ -520,7 +520,7 @@ def generate_class(filePath, output):
         do_json = description.get("do_json")
     else:
         do_json = False
-    class_name = "_" + os.path.basename(filePath).split(".")[0]
+    class_name = "Gen" + os.path.basename(filePath).split(".")[0]
 
     generator = ParcelGen()
     generator.json_map = json_map
@@ -537,8 +537,8 @@ def generate_class(filePath, output):
             dirs.append(class_name + ".java")
             targetFile = os.path.join(output, *dirs)
             # Generate child subclass if it doesn't exist
-            if class_name.startswith("_"):
-                child = class_name[1:]
+            if class_name.startswith("Gen"):
+                child = class_name[3:]
                 new_dirs = package.split(".")
                 new_dirs.append(child + ".java")
                 child_file = os.path.join(output, *new_dirs)
