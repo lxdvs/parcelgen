@@ -520,7 +520,7 @@ def generate_class(filePath, output):
         do_json = description.get("do_json")
     else:
         do_json = False
-    class_name = "_" + os.path.basename(filePath).split(".")[0]
+    class_name = "Gen" + os.path.basename(filePath).split(".")[0]
 
     generator = ParcelGen()
     generator.json_map = json_map
@@ -537,8 +537,8 @@ def generate_class(filePath, output):
             dirs.append(class_name + ".java")
             targetFile = os.path.join(output, *dirs)
             # Generate child subclass if it doesn't exist
-            if class_name.startswith("_"):
-                child = class_name[1:]
+            if class_name.startswith("Gen"):
+                child = class_name[3:]
                 new_dirs = package.split(".")
                 new_dirs.append(child + ".java")
                 child_file = os.path.join(output, *new_dirs)

@@ -6,7 +6,7 @@ import org.json.JSONObject;
 import com.yelp.parcelgen.JsonParser.DualCreator;
 
 
-public class Location extends _Location {
+public class Location extends GenLocation {
 
 	public static final DualCreator<Location> CREATOR = new DualCreator<Location>() {
 

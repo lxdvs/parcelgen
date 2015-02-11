@@ -8,7 +8,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 
-public class Business extends _Business {
+public class Business extends GenBusiness {
 
 	public static final DualCreator<Business> CREATOR = new DualCreator<Business>() {
 
